@@ -11,6 +11,7 @@ import {
   IconMessages,
   IconNotification,
   IconPackages,
+  IconRobot,
   IconPalette,
   IconServerOff,
   IconSettings,
@@ -18,7 +19,7 @@ import {
   IconUserCog,
   IconUserOff,
   IconUsers,
-} from '@tabler/icons-react'
+} from '@tabler/icons-react';
 import { AudioWaveform, Command, GalleryVerticalEnd } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -69,6 +70,11 @@ export const sidebarData: SidebarData = {
           url: '/chats',
           badge: '3',
           icon: IconMessages,
+        },
+        {
+          title: 'Agent Chat',
+          url: '/agent-chat',
+          icon: IconRobot,
         },
         {
           title: 'Users',
