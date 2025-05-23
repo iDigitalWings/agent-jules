@@ -162,7 +162,7 @@ async def root_redirect():
 # Example .env file in agent_backend directory:
 # OPENAI_API_KEY="your_openai_api_key_here"
 
-if __name__ == "__main__":
+def main():
     # This __main__ block is for direct script execution testing (e.g., python app/main.py)
     # Uvicorn is the standard way to run FastAPI apps.
     import uvicorn
@@ -175,3 +175,7 @@ if __name__ == "__main__":
     # If running `python app/main.py` from `agent_backend`, then `app.main:app` is how uvicorn CLI would see it.
     # For simplicity here, assuming CWD is `agent_backend/app` or `agent_backend` and Python resolves `main:app`.
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, reload_dirs=[project_root])
+
+if __name__ == "__main__":
+    main()
+    
