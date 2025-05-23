@@ -1,15 +1,15 @@
 // frontend/src/features/agent-chat/types/api.ts
 
+// Existing AgentMessage and AgentChatSession (ensure AgentMessage has all statuses)
 export interface AgentMessage {
   id: string;
   chatId: string;
   role: 'user' | 'agent' | 'system';
   content: string;
   timestamp: string; // ISO date string
-  status?: 'pending' | 'sent' | 'delivered' | 'error';
-  // Optional: For agent messages that might include interactive forms/elements
+  status?: 'pending' | 'sent' | 'delivered' | 'error' | 'streaming'; // Added 'streaming'
   agentForm?: {
-    type: string; // e.g., 'order_status_form', 'product_query_form'
+    type: string;
     fields: Array<{
       name: string;
       label: string;
@@ -17,7 +17,6 @@ export interface AgentMessage {
       options?: Array<{ value: string; label: string }>;
       required?: boolean;
     }>;
-    // Data submitted by the user for this form
     submittedData?: Record<string, any>;
   };
 }
@@ -27,24 +26,57 @@ export interface AgentChatSession {
   title: string;
   createdAt: string; // ISO date string
   lastMessageAt: string; // ISO date string
-  // May include a snippet of the last message or other metadata
   lastMessageSnippet?: string;
 }
 
-// Conceptual API endpoints (not actual code, but for documentation/type-safety)
+// --- New/Updated types for Streaming API ---
 
+// Represents a chunk of data received from the streaming API
+export interface StreamedMessageChunk {
+  type: 'text_chunk' | 'form_definition' | 'error_chunk' | 'end_of_stream' | 'agent_message_start';
+  content?: string;         // For 'text_chunk'
+  formDefinition?: any;   // For 'form_definition' (consider a more specific type)
+  error?: string;           // For 'error_chunk'
+  messageId: string;       // ID of the agent message being streamed. Sent with 'agent_message_start' and possibly other chunks.
+  chatId?: string;          // Associated chat ID, could be sent with 'agent_message_start'
+  timestamp?: string;       // Timestamp of the chunk or the message it belongs to
+}
+
+// Request payload for POST /api/chat (or the specific streaming endpoint)
+export interface PostStreamingChatMessageRequest {
+  chatId: string; // Assuming new messages are always associated with an existing chat for simplicity here
+  message: {
+    id: string; // Client-generated ID for the user's message
+    role: 'user';
+    content: string;
+    // No timestamp needed from client here, server can set it on receipt/processing
+  };
+  // userId?: string; // If backend requires explicit user identification beyond auth token
+}
+
+// Conceptual response for POST /api/chat
+// The actual response is a stream of StreamedMessageChunk objects.
+// For documentation, you can represent it like this:
+// Note: 'ReadableStream' is a global type available in modern browsers and Node.js.
+// You might need to ensure your TypeScript environment recognizes it (e.g., "dom" in tsconfig.json lib).
+export type PostStreamingChatMessageResponse = ReadableStream<StreamedMessageChunk>;
+
+
+// --- Keeping older conceptual API types for non-streaming actions if still needed ---
 // GET /api/agent-chats
 export type GetAgentChatSessionsResponse = AgentChatSession[];
 
 // GET /api/agent-chats/{chatId}/messages
 export type GetAgentChatMessagesResponse = AgentMessage[];
 
-// POST /api/agent-chats/{chatId}/messages
+// POST /api/agent-chats/{chatId}/messages (Non-streaming, if kept for some reason)
+/* // Commenting out as per instruction if fully replaced
 export interface PostAgentChatMessageRequest {
   chatId: string;
-  message: Pick<AgentMessage, 'role' | 'content'>; // User sends role and content
+  message: Pick<AgentMessage, 'role' | 'content'>; 
 }
-export type PostAgentChatMessageResponse = AgentMessage; // Returns the created/agent response message
+export type PostAgentChatMessageResponse = AgentMessage; 
+*/
 
 // PUT /api/agent-chats/messages/{messageId} (For editing a message)
 export interface PutAgentMessageRequest {
@@ -53,15 +85,19 @@ export interface PutAgentMessageRequest {
 }
 export type PutAgentMessageResponse = AgentMessage;
 
-// POST /api/agent-chats/messages/{messageId}/resend
+// POST /api/agent-chats/messages/{messageId}/resend (Non-streaming, if kept for some reason)
+/* // Commenting out as per instruction if fully replaced
 export interface PostResendMessageRequest {
   messageId: string;
 }
-export type PostResendMessageResponse = AgentMessage; // Or just a status
+export type PostResendMessageResponse = AgentMessage;
+*/
 
-// POST /api/agent-chats/agent-form-response
+// POST /api/agent-chats/agent-form-response (Non-streaming, if kept for some reason)
+/* // Commenting out as per instruction if fully replaced
 export interface PostAgentFormResponseRequest {
-  messageIdWithForm: string; // ID of the agent message that contained the form
+  messageIdWithForm: string; 
   formData: Record<string, any>;
 }
-export type PostAgentFormResponseResponse = AgentMessage; // Typically results in a new agent message
+export type PostAgentFormResponseResponse = AgentMessage; 
+*/
